@@ -43,13 +43,13 @@ export default function Home() {
     <div className="relative pb-6">
       <div className="relative h-44 overflow-hidden">
         <img src={homeScene(kind)} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-cream/0 via-cream/20 to-cream" />
-        <div className="absolute left-4 top-4 right-4 flex items-center gap-3">
+        <div className="absolute inset-0 bg-gradient-to-b from-cream/80 via-cream/45 to-cream" />
+        <div className="absolute left-4 top-4 right-4 flex items-center gap-3 rounded-3xl border border-white/70 bg-white/78 p-3 shadow-lg shadow-ink/10 backdrop-blur-md">
           {ob.heroEnabled && <img src={stateImage(kind, state.characterState, stage)} alt={ob.heroName} className={`w-24 h-24 object-contain drop-shadow-xl ${done ? 'animate-pop' : 'animate-floaty'}`} />}
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold text-teal-800 uppercase tracking-wide">{ob.heroEnabled ? ob.heroName : 'Сегодня'}</div>
-            <div className="font-black text-lg leading-tight">{status}</div>
-            <div className="text-xs text-ink/60 mt-1">{progressText}</div>
+            <div className="text-xs font-black text-teal-800 uppercase tracking-wide">{ob.heroEnabled ? ob.heroName : 'Сегодня'}</div>
+            <div className="font-black text-xl leading-tight text-ink">{status}</div>
+            <div className="text-sm font-semibold text-ink/70 mt-1">{progressText}</div>
           </div>
         </div>
       </div>

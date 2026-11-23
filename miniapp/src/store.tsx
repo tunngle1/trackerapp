@@ -76,7 +76,7 @@ function defaultOnboarding(): OnboardingData {
     source: '',
     codeWord: '',
     character: 'robot',
-    heroName: 'МейВиГо',
+    heroName: 'МиВиГо',
     heroEnabled: true,
     trackName: 'Мой путь',
     habit: defaultHabit(),
@@ -88,7 +88,7 @@ function migrateState(input: Partial<AppState>): AppState {
   const onboarding = input.onboarding ? {
     ...defaultOnboarding(),
     ...input.onboarding,
-    heroName: input.onboarding.heroName ?? (input.onboarding.character === 'cat' ? 'Пушок' : 'МейВиГо'),
+    heroName: input.onboarding.heroName ?? (input.onboarding.character === 'cat' ? 'Пушок' : 'МиВиГо'),
     heroEnabled: input.onboarding.heroEnabled ?? true,
     habit: {
       ...defaultHabit(),

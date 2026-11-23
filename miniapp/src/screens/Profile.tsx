@@ -20,7 +20,7 @@ export default function Profile() {
         <img src={stageImage(ob.character, stage)} alt="" className="w-20 h-20 object-contain" />
         <div className="flex-1">
           <div className="font-black text-lg">
-            {ob.character === 'robot' ? 'МейВиГо' : 'Пушок'} · стадия {stage}
+            {ob.character === 'robot' ? 'МиВиГо' : 'Пушок'} · стадия {stage}
           </div>
           <div className="text-sm text-ink/60">Трек «{ob.trackName}»</div>
           <div className="text-xs text-ink/40 mt-1">

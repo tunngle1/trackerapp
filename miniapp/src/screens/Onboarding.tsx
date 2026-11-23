@@ -41,7 +41,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [startDate, setStartDate] = useState(todayStr());
   const [anchorEvent, setAnchorEvent] = useState('');
   const [character, setCharacter] = useState<CharacterKind>('robot');
-  const [heroName, setHeroName] = useState('МейВиГо');
+  const [heroName, setHeroName] = useState('МиВиГо');
   const [heroEnabled, setHeroEnabled] = useState(true);
 
   const totalSteps = 7;
@@ -86,7 +86,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
         source: '',
         codeWord: '',
         character,
-        heroName: heroName.trim() || (character === 'cat' ? 'Пушок' : 'МейВиГо'),
+        heroName: heroName.trim() || (character === 'cat' ? 'Пушок' : 'МиВиГо'),
         heroEnabled,
         trackName: sphere,
         habit,
@@ -121,9 +121,10 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
           <StepFrame title="Что хочешь привести в порядок?" step={step} total={totalSteps} onBack={back} onNext={next}>
             <div className="space-y-3">
               {SPHERES.map(s => (
-                <button key={s.id} onClick={() => { setSphere(s.id); haptic('light'); }} className={`card w-full p-4 flex items-center gap-4 text-left transition ${sphere === s.id ? 'ring-4 ring-teal-600' : ''}`}>
+                <button key={s.id} onClick={() => { setSphere(s.id); haptic('light'); }} className={`card w-full p-4 flex items-center gap-4 text-left transition border-2 ${sphere === s.id ? 'border-teal-600 bg-teal-50 shadow-teal-900/10' : 'border-transparent'}`}>
                   <img src={s.icon} alt="" className="w-14 h-14 object-contain" />
-                  <span><b className="block text-lg uppercase">{s.title}</b><span className="text-sm text-ink/60">{s.text}</span></span>
+                  <span className="flex-1"><b className="block text-lg uppercase">{s.title}</b><span className="text-sm text-ink/60">{s.text}</span></span>
+                  {sphere === s.id && <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-white text-sm font-black">✓</span>}
                 </button>
               ))}
             </div>
@@ -191,7 +192,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
           <StepFrame title="Хочешь героя рядом?" subtitle="Кошечка или робот помогают сделать путь заметнее. Можно продолжить без активного сопровождения." step={step} total={totalSteps} onBack={back} onNext={next}>
             <div className="grid grid-cols-2 gap-4 mb-4">
               {[{ kind: 'robot' as CharacterKind, img: robot.stage1, name: 'Робот' }, { kind: 'cat' as CharacterKind, img: cat.stage1, name: 'Кошечка' }].map(c => (
-                <button key={c.kind} onClick={() => { setCharacter(c.kind); if (!heroName || heroName === 'Пушок' || heroName === 'МейВиГо') setHeroName(c.kind === 'cat' ? 'Пушок' : 'МейВиГо'); }} className={`card p-4 ${character === c.kind ? 'ring-4 ring-teal-600' : ''}`}>
+                <button key={c.kind} onClick={() => { setCharacter(c.kind); if (!heroName || heroName === 'Пушок' || heroName === 'МиВиГо') setHeroName(c.kind === 'cat' ? 'Пушок' : 'МиВиГо'); }} className={`card p-4 ${character === c.kind ? 'ring-4 ring-teal-600' : ''}`}>
                   <img src={c.img} alt="" className="w-32 h-32 object-contain mx-auto" /><b>{c.name}</b>
                 </button>
               ))}

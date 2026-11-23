@@ -80,7 +80,7 @@ export default function Pet() {
 
       {/* Альбом персонажа — все варианты */}
       <Card className="p-4">
-        <div className="font-bold mb-3">Альбом {kind === 'robot' ? 'МейВиГо' : 'Пушка'}</div>
+        <div className="font-bold mb-3">Альбом {kind === 'robot' ? 'МиВиГо' : 'Пушка'}</div>
         <div className="grid grid-cols-3 gap-2">
           {(kind === 'robot'
             ? [robot.stage1, robot.stage2, robot.stage3, robot.stage3Alt, robot.stage4, robot.stage4Alt, robot.stage5, robot.stage5Alt, robot.sportRoute]
