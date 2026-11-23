@@ -26,13 +26,13 @@ export default function Path() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink/55 to-transparent" />
         <div className="absolute bottom-4 left-5 right-5">
           <div className="text-white/80 text-sm font-semibold">90-дневный маршрут · день {dayNumber}/90</div>
-          <div className="text-white text-2xl font-black">Стадия {stage} — {STAGES[stage - 1].name}</div>
+          <div className="text-white text-xl min-[390px]:text-2xl font-black leading-tight">Стадия {stage} — {STAGES[stage - 1].name}</div>
         </div>
-        <img src={stageImage(kind, stage)} alt="" className="absolute -right-4 -top-6 h-56 object-contain drop-shadow-2xl" />
+        <img src={stageImage(kind, stage)} alt="" className="absolute -right-6 min-[390px]:-right-4 -top-2 min-[390px]:-top-6 h-48 min-[390px]:h-56 object-contain drop-shadow-2xl" />
       </div>
 
       <Card className="p-4">
-        <div className="flex justify-between text-sm font-semibold mb-2">
+        <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-sm font-semibold mb-2">
           <span>Соблюдение личного плана</span>
           <span className="text-ink/50">{stats.done}/{stats.elapsedPlanned || 0}</span>
         </div>
@@ -53,10 +53,10 @@ export default function Path() {
           const reached = stage >= s.stage;
           const current = stage === s.stage;
           return (
-            <Card key={s.stage} className={`p-4 flex items-center gap-4 ${current ? 'ring-2 ring-teal-600' : ''} ${!reached ? 'opacity-70' : ''}`}>
-              <img src={stageImage(kind, reached ? s.stage : Math.max(1, stage))} alt="" className={`w-20 h-20 object-contain ${current ? 'animate-floaty' : ''}`} />
-              <div className="flex-1">
-                <div className="flex justify-between items-baseline">
+            <Card key={s.stage} className={`p-3 min-[390px]:p-4 flex items-center gap-3 min-[390px]:gap-4 ${current ? 'ring-2 ring-teal-600' : ''} ${!reached ? 'opacity-70' : ''}`}>
+              <img src={stageImage(kind, reached ? s.stage : Math.max(1, stage))} alt="" className={`w-16 h-16 min-[390px]:w-20 min-[390px]:h-20 object-contain shrink-0 ${current ? 'animate-floaty' : ''}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap justify-between items-baseline gap-x-2 gap-y-1">
                   <span className="font-black">Стадия {s.stage} · {s.name}</span>
                   <span className="text-xs text-ink/50">день {s.day}</span>
                 </div>

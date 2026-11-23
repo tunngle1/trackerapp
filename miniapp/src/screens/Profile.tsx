@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '../store';
 import { botImgs, icons, stageImage } from '../data/assets';
-import { Card, PrimaryButton, GhostButton } from '../components/ui';
+import { Card, GhostButton } from '../components/ui';
 import { useTelegram } from '../telegram';
 
 export default function Profile() {
@@ -9,16 +9,13 @@ export default function Profile() {
   const { haptic } = useTelegram();
   const ob = state.onboarding!;
   const [showLetter, setShowLetter] = useState(!state.founderLetterRead);
-  const [showPay, setShowPay] = useState(false);
-
-  const daysLeft = state.pro ? 7 : 0;
 
   return (
     <div className="px-5 pt-8 pb-6 space-y-4">
       {/* Профиль */}
-      <Card className="p-5 flex items-center gap-4">
-        <img src={stageImage(ob.character, stage)} alt="" className="w-20 h-20 object-contain" />
-        <div className="flex-1">
+      <Card className="p-4 min-[390px]:p-5 flex items-center gap-3 min-[390px]:gap-4">
+        <img src={stageImage(ob.character, stage)} alt="" className="w-16 h-16 min-[390px]:w-20 min-[390px]:h-20 object-contain shrink-0" />
+        <div className="flex-1 min-w-0">
           <div className="font-black text-lg">
             {ob.character === 'robot' ? 'МиВиГо' : 'Пушок'} · стадия {stage}
           </div>
@@ -28,7 +25,7 @@ export default function Profile() {
             {ob.codeWord && ` · код: ${ob.codeWord}`}
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-right shrink-0">
           <div className="font-black text-teal-700">{state.xp} XP</div>
           <div className="text-xs text-ink/50">{state.coins} монет</div>
         </div>
@@ -37,30 +34,19 @@ export default function Profile() {
       {/* Подписка Pro */}
       <Card className="p-5 relative overflow-hidden">
         <img src={icons.battery} alt="" className="absolute -right-4 -top-4 w-28 h-28 opacity-20 object-contain" />
-        <div className="font-black text-lg">MeWeGo Pro</div>
+        <div className="font-black text-lg">Полный тестовый доступ</div>
         <div className="text-sm text-ink/60 mt-1">
-          {state.pro ? `Активна · ${daysLeft} дн. доступа` : '199 ₽/мес · 7 дней пробного доступа'}
+          Все платные ограничения временно отключены для проверки приложения.
         </div>
         <ul className="text-sm text-ink/70 mt-3 space-y-1">
-          <li>• Безлимит привычек и треков</li>
-          <li>• Аналитика и карточки для сторис</li>
-          <li>• Заморозка серии, расширенная комната</li>
-          <li>• Бадди и клубы</li>
+          <li>• Можно тестировать все привычки и треки.</li>
+          <li>• Отчёты, календарь и карточки доступны сразу.</li>
+          <li>• Герой, магазин, комната и коллекции открыты для проверки.</li>
+          <li>• Экран оплаты сейчас не нужен.</li>
         </ul>
-        {state.pro ? (
-          <GhostButton onClick={() => { dispatch({ type: 'SET_PRO', pro: false }); haptic('light'); }} className="mt-4 w-full">
-            Отменить подписку
-          </GhostButton>
-        ) : showPay ? (
-          <div className="mt-4 space-y-2">
-            <PrimaryButton onClick={() => { dispatch({ type: 'SET_PRO', pro: true }); setShowPay(false); haptic('heavy'); }}>
-              Оплатить 199 ₽ (демо)
-            </PrimaryButton>
-            <GhostButton onClick={() => setShowPay(false)} className="w-full">Назад</GhostButton>
-          </div>
-        ) : (
-          <PrimaryButton onClick={() => setShowPay(true)} className="mt-4">Попробовать 7 дней бесплатно</PrimaryButton>
-        )}
+        <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-800">
+          Тестовый режим включён
+        </div>
       </Card>
 
       {/* Письмо основателя */}
@@ -86,12 +72,12 @@ export default function Profile() {
       <Card className="p-5">
         <div className="font-bold mb-3">Привычка и напоминания</div>
         <div className="text-sm space-y-2 text-ink/70">
-          <div className="flex justify-between"><span>Название</span><span className="font-semibold text-ink">{ob.habit.name}</span></div>
-          <div className="flex justify-between"><span>Минимум / Цель</span><span className="font-semibold text-ink">{ob.habit.targetMin} / {ob.habit.targetGoal} {ob.habit.unit}</span></div>
-          <div className="flex justify-between"><span>Дни</span><span className="font-semibold text-ink">{ob.habit.days.map(d => ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d]).join(', ')}</span></div>
-          <div className="flex justify-between"><span>Напоминание</span><span className="font-semibold text-ink">{ob.habit.reminderOn ? (ob.habit.reminderTime ?? 'вкл') : 'выкл'}</span></div>
+          <div className="flex flex-wrap justify-between gap-x-3 gap-y-1"><span>Название</span><span className="font-semibold text-ink text-right break-words">{ob.habit.name}</span></div>
+          <div className="flex flex-wrap justify-between gap-x-3 gap-y-1"><span>Минимум / Цель</span><span className="font-semibold text-ink text-right">{ob.habit.targetMin} / {ob.habit.targetGoal} {ob.habit.unit}</span></div>
+          <div className="flex flex-wrap justify-between gap-x-3 gap-y-1"><span>Дни</span><span className="font-semibold text-ink text-right">{ob.habit.days.map(d => ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d]).join(', ')}</span></div>
+          <div className="flex flex-wrap justify-between gap-x-3 gap-y-1"><span>Напоминание</span><span className="font-semibold text-ink text-right">{ob.habit.reminderOn ? (ob.habit.reminderTime ?? 'вкл') : 'выкл'}</span></div>
         </div>
-        <div className="flex gap-2 mt-4">
+        <div className="grid grid-cols-2 gap-2 mt-4 max-[340px]:grid-cols-1">
           <GhostButton
             onClick={() => {
               const until = prompt('Пауза до даты (ГГГГ-ММ-ДД), пусто — снять', state.pausedUntil ?? '');

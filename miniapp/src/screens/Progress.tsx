@@ -71,12 +71,12 @@ export default function Progress() {
       <div className="relative rounded-3xl overflow-hidden">
         <img src={scenes.nightCity} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-ink/20" />
-        <div className="relative p-6 text-white">
+        <div className="relative p-5 min-[390px]:p-6 text-white">
           <div className="text-white/70 text-sm font-semibold">Мои доказательства</div>
           <div className="text-4xl font-black mt-1">{totalDone}</div>
           <div className="text-white/80">выполненных дней с привычкой</div>
-          <div className="mt-3 flex gap-2">
-            <button onClick={createStoryCard} className="rounded-xl bg-white text-teal-800 font-bold px-4 py-2 text-sm active:scale-95">
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button onClick={createStoryCard} className="min-h-10 rounded-xl bg-white text-teal-800 font-bold leading-tight px-4 py-2 text-sm active:scale-95">
               Сохранить карточку
             </button>
           </div>
@@ -85,15 +85,15 @@ export default function Progress() {
 
       <Card className="p-5">
         <div className="font-bold mb-4">Неделя по твоему расписанию</div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 min-[390px]:gap-4 max-[340px]:grid-cols-1">
           <div>
             <div className="text-xs text-ink/50 mb-1">Эта неделя</div>
-            <div className="text-3xl font-black text-teal-700">{weekData.done}/{weekData.elapsedPlanned || weekData.planned}</div>
+            <div className="text-2xl min-[390px]:text-3xl font-black text-teal-700">{weekData.done}/{weekData.elapsedPlanned || weekData.planned}</div>
             <ProgressBar value={weekData.done} max={Math.max(1, weekData.elapsedPlanned || weekData.planned)} barClass="bg-teal-600" className="mt-2" />
           </div>
           <div>
             <div className="text-xs text-ink/50 mb-1">Прошлая неделя</div>
-            <div className="text-3xl font-black text-ink/40">{prevWeek.planned ? `${prevWeek.done}/${prevWeek.planned}` : 'нет данных'}</div>
+            <div className="text-2xl min-[390px]:text-3xl font-black text-ink/40">{prevWeek.planned ? `${prevWeek.done}/${prevWeek.planned}` : 'нет данных'}</div>
             <ProgressBar value={prevWeek.done} max={Math.max(1, prevWeek.planned)} barClass="bg-ink/20" className="mt-2" />
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function Progress() {
         )}
       </Card>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 min-[390px]:gap-3">
         {[
           { icon: icons.gear, v: state.xp, l: 'XP' },
           { icon: icons.chip, v: state.coins, l: 'монет' },

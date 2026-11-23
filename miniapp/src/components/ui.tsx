@@ -32,7 +32,7 @@ export function PrimaryButton({ children, onClick, disabled, className = '' }: {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full rounded-2xl bg-gradient-to-r from-teal-700 to-teal-600 text-white font-bold py-3.5 px-6 shadow-lg shadow-teal-900/20 active:scale-[0.98] transition disabled:opacity-40 ${className}`}
+      className={`w-full min-h-12 rounded-2xl bg-gradient-to-r from-teal-700 to-teal-600 text-white font-bold leading-tight py-3.5 px-4 shadow-lg shadow-teal-900/20 active:scale-[0.98] transition disabled:opacity-40 ${className}`}
     >
       {children}
     </button>
@@ -45,7 +45,7 @@ export function GhostButton({ children, onClick, className = '' }: {
   return (
     <button
       onClick={onClick}
-      className={`rounded-2xl border border-ink/15 bg-white/70 font-semibold py-3 px-6 active:scale-[0.98] transition ${className}`}
+      className={`min-h-11 rounded-2xl border border-ink/15 bg-white/70 font-semibold leading-tight py-3 px-4 active:scale-[0.98] transition ${className}`}
     >
       {children}
     </button>

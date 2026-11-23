@@ -38,10 +38,10 @@ export default function Pet() {
       {/* Декор — все иконки задействованы */}
       <Card className="p-4">
         <div className="font-bold mb-3">Комната · декор</div>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 gap-2 min-[390px]:gap-3">
           {[icons.quill, icons.flower, icons.bolt, icons.chip, icons.shell, icons.stone, icons.cone, icons.gear, icons.crystal, icons.spring, icons.battery, icons.maple].map((ic, i) => (
             <div key={i} className="flex flex-col items-center gap-1">
-              <img src={ic} alt="" className="w-12 h-12 object-contain" />
+              <img src={ic} alt="" className="w-10 h-10 min-[390px]:w-12 min-[390px]:h-12 object-contain" />
               <span className="text-[10px] text-ink/40">#{i + 1}</span>
             </div>
           ))}
@@ -56,9 +56,9 @@ export default function Pet() {
         </div>
         <div className="space-y-2">
           {SHOP_ITEMS.map(item => (
-            <div key={item.name} className="flex items-center gap-3 rounded-2xl bg-white/70 border border-ink/10 p-3">
-              <img src={item.icon} alt="" className="w-11 h-11 object-contain" />
-              <div className="flex-1">
+            <div key={item.name} className="flex items-center gap-2 min-[390px]:gap-3 rounded-2xl bg-white/70 border border-ink/10 p-3">
+              <img src={item.icon} alt="" className="w-10 h-10 min-[390px]:w-11 min-[390px]:h-11 object-contain shrink-0" />
+              <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm">{item.name}</div>
                 <div className="text-xs text-ink/50">{item.desc}</div>
               </div>
@@ -69,7 +69,7 @@ export default function Pet() {
                     haptic('medium');
                   }
                 }}
-                className={`rounded-xl px-3 py-1.5 text-sm font-bold ${state.coins >= item.price ? 'bg-amber-500 text-white' : 'bg-ink/10 text-ink/40'}`}
+                className={`shrink-0 rounded-xl px-2.5 py-1.5 text-sm font-bold ${state.coins >= item.price ? 'bg-amber-500 text-white' : 'bg-ink/10 text-ink/40'}`}
               >
                 {item.price}¢
               </button>
@@ -81,7 +81,7 @@ export default function Pet() {
       {/* Альбом персонажа — все варианты */}
       <Card className="p-4">
         <div className="font-bold mb-3">Альбом {kind === 'robot' ? 'МиВиГо' : 'Пушка'}</div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-1.5 min-[390px]:gap-2">
           {(kind === 'robot'
             ? [robot.stage1, robot.stage2, robot.stage3, robot.stage3Alt, robot.stage4, robot.stage4Alt, robot.stage5, robot.stage5Alt, robot.sportRoute]
             : [cat.stage1, cat.stage1Alt, cat.stage2, cat.stage3, cat.stage3Alt, cat.stage4, cat.stage4Alt, cat.stage5, cat.stage5Alt]

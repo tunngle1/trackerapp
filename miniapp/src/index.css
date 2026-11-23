@@ -21,6 +21,26 @@ html, body, #root {
   overscroll-behavior: none;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+img {
+  max-width: 100%;
+}
+
 .app-shell {
   max-width: 480px;
   margin: 0 auto;
@@ -34,13 +54,15 @@ html, body, #root {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
 .bottom-nav {
   position: sticky;
   bottom: 0;
+  z-index: 20;
   backdrop-filter: blur(12px);
-  background: rgba(253, 246, 236, 0.85);
+  background: rgba(253, 246, 236, 0.92);
   border-top: 1px solid rgba(43, 33, 24, 0.08);
 }
 

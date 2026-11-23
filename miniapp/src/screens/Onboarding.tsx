@@ -103,16 +103,16 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
           <div className="relative min-h-[100dvh] flex flex-col">
             <img src={scenes.nightCity} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/10 to-cream" />
-            <div className="relative flex-1 flex flex-col justify-end px-6 pb-9">
-              <div className="relative h-64 mb-3">
-                <img src={botImgs.duoGreeting} alt="" className="absolute inset-x-0 bottom-0 mx-auto w-72 h-72 object-contain animate-floaty drop-shadow-2xl mix-blend-normal" />
+            <div className="relative flex-1 flex flex-col justify-end px-5 pb-8 min-[390px]:px-6 min-[390px]:pb-9">
+              <div className="relative h-52 min-[390px]:h-64 mb-3">
+                <img src={botImgs.duoGreeting} alt="" className="absolute inset-x-0 bottom-0 mx-auto w-64 h-64 min-[390px]:w-72 min-[390px]:h-72 object-contain animate-floaty drop-shadow-2xl mix-blend-normal" />
               </div>
               <h1 className="text-3xl font-black text-white drop-shadow-lg leading-tight">Что ты давно хочешь начать, но всё откладываешь?</h1>
               <p className="text-white/90 mt-3 mb-6 text-base leading-relaxed">
                 Выбери одно действие. Отмечай, когда сделал. Смотри, как меняется твой результат.
               </p>
               <PrimaryButton onClick={next} className="!bg-teal-700 !text-white shadow-2xl">Начать бесплатно</PrimaryButton>
-              <p className="text-white/75 text-xs mt-4 text-center">7 дней бесплатно. Потом — 199 ₽ в месяц, если решишь продолжить.</p>
+              <p className="text-white/75 text-xs mt-4 text-center">Тестовый доступ открыт: все функции доступны бесплатно.</p>
             </div>
           </div>
         )}
@@ -134,7 +134,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
         {step === 2 && (
           <StepFrame title="Что именно хочешь делать?" subtitle="Напиши своими словами. Мы не будем заменять формулировку." step={step} total={totalSteps} onBack={back} onNext={next} disabled={!canContinue}>
             <textarea value={habitName} onChange={e => setHabitName(e.target.value)} placeholder="Например: учить английский каждый день" rows={4} className="w-full rounded-3xl border border-ink/15 bg-white/85 px-4 py-4 outline-none focus:border-teal-600 text-lg" />
-            <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-ink/55">
+            <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-ink/55 max-[360px]:grid-cols-1">
               <Example text="Читать перед сном" onPick={setHabitName} />
               <Example text="Гулять после работы" onPick={setHabitName} />
               <Example text="Работать над проектом" onPick={setHabitName} />
@@ -159,7 +159,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 
         {step === 4 && (
           <StepFrame title="Как это измерять?" subtitle="Единица будет одинаковой для минимума и полной цели." step={step} total={totalSteps} onBack={back} onNext={next} disabled={!canContinue}>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 max-[360px]:grid-cols-1">
               {UNITS.map(u => (
                 <button key={u.kind} onClick={() => { setUnitKind(u.kind); haptic('light'); }} className={`rounded-2xl border p-3 text-left transition ${unitKind === u.kind ? 'bg-teal-700 text-white border-teal-700' : 'bg-white/80 border-ink/15'}`}>
                   <b className="block">{u.label}</b><span className="text-xs opacity-70">{u.helper}</span>
@@ -173,10 +173,10 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
         {step === 5 && (
           <StepFrame title="Когда будем это делать?" step={step} total={totalSteps} onBack={back} onNext={next} disabled={!canContinue}>
             <label className="block text-sm font-semibold mb-2">Дни недели</label>
-            <div className="grid grid-cols-7 gap-2 mb-5">
+            <div className="grid grid-cols-7 gap-1.5 min-[390px]:gap-2 mb-5">
               {WEEKDAYS.map(w => {
                 const active = days.includes(w.d);
-                return <button key={w.d} onClick={() => setDays(ds => active ? ds.filter(d => d !== w.d) : [...ds, w.d].sort())} className={`rounded-xl py-2.5 font-bold text-sm border transition ${active ? 'bg-teal-700 text-white border-teal-700' : 'bg-white/80 border-ink/15'}`}>{w.label}</button>;
+                return <button key={w.d} onClick={() => setDays(ds => active ? ds.filter(d => d !== w.d) : [...ds, w.d].sort())} className={`min-h-10 rounded-xl px-0.5 py-2 font-bold text-xs min-[390px]:text-sm border transition ${active ? 'bg-teal-700 text-white border-teal-700' : 'bg-white/80 border-ink/15'}`}>{w.label}</button>;
               })}
             </div>
             <label className="block text-sm font-semibold mb-1.5">Дата начала</label>
@@ -190,10 +190,10 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
 
         {step === 6 && (
           <StepFrame title="Хочешь героя рядом?" subtitle="Кошечка или робот помогают сделать путь заметнее. Можно продолжить без активного сопровождения." step={step} total={totalSteps} onBack={back} onNext={next}>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-3 min-[390px]:gap-4 mb-4">
               {[{ kind: 'robot' as CharacterKind, img: robot.stage1, name: 'Робот' }, { kind: 'cat' as CharacterKind, img: cat.stage1, name: 'Кошечка' }].map(c => (
                 <button key={c.kind} onClick={() => { setCharacter(c.kind); if (!heroName || heroName === 'Пушок' || heroName === 'МиВиГо') setHeroName(c.kind === 'cat' ? 'Пушок' : 'МиВиГо'); }} className={`card p-4 ${character === c.kind ? 'ring-4 ring-teal-600' : ''}`}>
-                  <img src={c.img} alt="" className="w-32 h-32 object-contain mx-auto" /><b>{c.name}</b>
+                  <img src={c.img} alt="" className="w-24 h-24 min-[390px]:w-32 min-[390px]:h-32 object-contain mx-auto" /><b>{c.name}</b>
                 </button>
               ))}
             </div>
@@ -231,15 +231,15 @@ function StepFrame({ title, subtitle, step, total, children, onBack, onNext, dis
   title: string; subtitle?: string; step: number; total: number; children: React.ReactNode; onBack: () => void; onNext: () => void; disabled?: boolean;
 }) {
   return (
-    <div className="px-6 pt-12 pb-8 animate-fade-up">
+    <div className="px-5 min-[390px]:px-6 pt-12 pb-8 animate-fade-up">
       <div className="absolute top-4 left-0 right-0 flex justify-center gap-1.5">
         {Array.from({ length: total }).map((_, i) => <div key={i} className={`h-1.5 rounded-full transition-all ${i + 1 === step ? 'w-6 bg-teal-600' : 'w-1.5 bg-ink/20'}`} />)}
       </div>
-      <h2 className="text-2xl font-black leading-tight">{title}</h2>
+      <h2 className="text-[1.35rem] min-[390px]:text-2xl font-black leading-tight">{title}</h2>
       {subtitle && <p className="text-ink/60 mt-1 mb-6">{subtitle}</p>}
       {!subtitle && <div className="mb-6" />}
       {children}
-      <div className="flex gap-3 mt-8">
+      <div className="grid grid-cols-[1fr_2fr] gap-3 mt-8 max-[340px]:grid-cols-1">
         <GhostButton onClick={onBack} className="flex-1">Назад</GhostButton>
         <PrimaryButton onClick={onNext} disabled={disabled} className="flex-[2]">Дальше</PrimaryButton>
       </div>

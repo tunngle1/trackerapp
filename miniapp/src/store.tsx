@@ -127,6 +127,7 @@ function migrateState(input: Partial<AppState>): AppState {
     ...input,
     onboarding,
     entries,
+    pro: true,
     lastResultMessage: input.lastResultMessage ?? null,
     dismissedHelpAt: input.dismissedHelpAt ?? null,
   };
@@ -151,7 +152,7 @@ function defaultState(): AppState {
     energy: 85,
     entries: {},
     pausedUntil: null,
-    pro: false,
+    pro: true,
     founderLetterRead: false,
     lastResultMessage: null,
     dismissedHelpAt: null,

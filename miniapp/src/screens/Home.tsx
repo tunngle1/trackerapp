@@ -70,7 +70,7 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
                 <div className="rounded-2xl bg-teal-50 border border-teal-100 p-3">
                   <div className="text-xs font-bold text-teal-700">Минимум</div>
                   <div className="text-lg font-black">{habit.noQuantity ? 'Сделано' : formatUnit(habit.targetMin, habit)}</div>
@@ -88,14 +88,16 @@ export default function Home() {
                 </div>
               )}
 
-              <div className={`mt-5 grid gap-2 ${habit.noQuantity ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                <button onClick={() => logToday(habit.targetMin)} className="rounded-2xl bg-teal-700 text-white font-bold py-4 active:scale-95 transition shadow-lg shadow-teal-900/20">
+              <div className={`mt-5 grid gap-2 ${habit.noQuantity ? 'grid-cols-1' : 'grid-cols-2 max-[380px]:grid-cols-1'}`}>
+                <button onClick={() => logToday(habit.targetMin)} className="min-h-14 rounded-2xl bg-teal-700 px-3 py-3 text-white font-bold leading-tight active:scale-95 transition shadow-lg shadow-teal-900/20">
                   {habit.noQuantity ? 'Сделано' : 'Сделал минимум'}
                 </button>
-                {!habit.noQuantity && <button onClick={() => logToday(habit.targetGoal)} className="rounded-2xl bg-orange-500 text-white font-bold py-4 active:scale-95 transition shadow-lg shadow-orange-900/20">Сделал полностью</button>}
+                {!habit.noQuantity && <button onClick={() => logToday(habit.targetGoal)} className="min-h-14 rounded-2xl bg-orange-500 px-3 py-3 text-white font-bold leading-tight active:scale-95 transition shadow-lg shadow-orange-900/20">Сделал полностью</button>}
               </div>
-              {!habit.noQuantity && <button onClick={askCustomResult} className="mt-3 text-sm font-semibold text-teal-800 underline underline-offset-4">Указать свой результат</button>}
-              {todayEntry && <button onClick={() => dispatch({ type: 'CLEAR_ENTRY', date: today })} className="ml-4 mt-3 text-sm font-semibold text-ink/50 underline underline-offset-4">Исправить отметку</button>}
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                {!habit.noQuantity && <button onClick={askCustomResult} className="text-sm font-semibold text-teal-800 underline underline-offset-4">Указать свой результат</button>}
+                {todayEntry && <button onClick={() => dispatch({ type: 'CLEAR_ENTRY', date: today })} className="text-sm font-semibold text-ink/50 underline underline-offset-4">Исправить отметку</button>}
+              </div>
             </>
           )}
         </Card>
@@ -114,7 +116,7 @@ export default function Home() {
               {REASONS.map(r => <button key={r.key} onClick={() => setReason(r.key)} className={`rounded-full px-3 py-2 text-sm font-semibold border ${reason === r.key ? 'bg-teal-700 text-white border-teal-700' : 'bg-white/80 border-ink/10'}`}>{r.title}</button>)}
             </div>
             {selectedReason && <div className="mt-3 rounded-2xl bg-white/75 border border-ink/10 p-3 text-sm text-ink/75">{selectedReason.advice}</div>}
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <button onClick={() => dispatch({ type: 'DISMISS_HELP' })} className="rounded-xl bg-white/80 border border-ink/10 px-3 py-2 text-sm font-semibold">Не сейчас</button>
               <button onClick={() => alert('Изменение плана будет доступно в настройках привычки на следующем шаге.')} className="rounded-xl bg-teal-700 text-white px-3 py-2 text-sm font-semibold">Изменить план</button>
             </div>
@@ -131,7 +133,7 @@ export default function Home() {
         </Card>
 
         <Card className="p-4 animate-fade-up">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <StatChip icon={icons.crystal} value={state.xp} label="XP" />
             <StatChip icon={icons.chip} value={state.coins} label="монет" />
             <StatChip icon={icons.battery} value={`${state.energy}/100`} label="энергия" />
