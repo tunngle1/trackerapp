@@ -97,8 +97,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <div className="app-shell">
-      <div className="scroll-area relative">
+    <div className="scroll-area relative w-full">
         {step === 0 && (
           <div className="relative min-h-[100dvh] flex flex-col">
             <img src={scenes.nightCity} alt="" className="absolute inset-0 w-full h-full object-cover" />
@@ -223,7 +222,6 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
           </div>
         )}
       </div>
-    </div>
   );
 }
 

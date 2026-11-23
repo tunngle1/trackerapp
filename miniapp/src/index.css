@@ -42,12 +42,15 @@ img {
 }
 
 .app-shell {
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: hidden;
 }
 
 .scroll-area {
