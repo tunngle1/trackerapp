@@ -99,7 +99,7 @@ export const icons = {
   crystal: img('icons/icon_crystal.png'),
   spring: img('icons/icon_spring.png'),
   battery: img('icons/icon_battery.png'),
-  quill: img('icons/icon_deco_quill.png'),
+  quill: img('icons/deco_quill.png'),
   flower: img('icons/deco_flower.png'),
   maple: img('icons/deco_maple.png'),
 };

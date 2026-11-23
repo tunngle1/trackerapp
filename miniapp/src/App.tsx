@@ -10,14 +10,12 @@ import Progress from './screens/Progress';
 import Profile from './screens/Profile';
 import { icons } from './data/assets';
 
-type Tab = 'home' | 'path' | 'calendar' | 'pet' | 'progress' | 'profile';
+type Tab = 'home' | 'path' | 'hero' | 'profile';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'home', label: 'Сегодня', icon: icons.bolt },
-  { id: 'path', label: 'Путь', icon: icons.crystal },
-  { id: 'calendar', label: 'Календарь', icon: icons.cone },
-  { id: 'pet', label: 'Питомец', icon: icons.gear },
-  { id: 'progress', label: 'Прогресс', icon: icons.shell },
+  { id: 'path', label: 'Мой путь', icon: icons.crystal },
+  { id: 'hero', label: 'Герой', icon: icons.gear },
   { id: 'profile', label: 'Ещё', icon: icons.chip },
 ];
 
@@ -43,27 +41,43 @@ function Shell() {
       )}
       <div className="scroll-area">
         {tab === 'home' && <Home />}
-        {tab === 'path' && <Path />}
-        {tab === 'calendar' && <CalendarScreen />}
-        {tab === 'pet' && <Pet />}
-        {tab === 'progress' && <Progress />}
+        {tab === 'path' && <MyPath />}
+        {tab === 'hero' && <Hero />}
         {tab === 'profile' && <Profile />}
       </div>
-      <nav className="bottom-nav">
-        <div className="grid grid-cols-6 max-w-[480px] mx-auto">
+      <nav className="bottom-nav pb-[max(env(safe-area-inset-bottom),0px)]">
+        <div className="grid grid-cols-4 max-w-[480px] mx-auto">
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex flex-col items-center py-2.5 gap-0.5 transition ${tab === t.id ? 'text-teal-700' : 'text-ink/40'}`}
             >
-              <img src={t.icon} alt="" className={`w-6 h-6 object-contain ${tab === t.id ? '' : 'opacity-60'}`} />
-              <span className="text-[10px] font-semibold">{t.label}</span>
+              <img src={t.icon} alt="" className={`w-7 h-7 object-contain ${tab === t.id ? '' : 'opacity-60'}`} />
+              <span className="text-[11px] font-semibold">{t.label}</span>
             </button>
           ))}
         </div>
       </nav>
     </div>
+  );
+}
+
+function MyPath() {
+  return (
+    <>
+      <CalendarScreen />
+      <Progress />
+    </>
+  );
+}
+
+function Hero() {
+  return (
+    <>
+      <Path />
+      <Pet />
+    </>
   );
 }
 

@@ -1,156 +1,142 @@
-import { useStore } from '../store';
+import { useState } from 'react';
+import { useStore, formatUnit } from '../store';
 import { useTelegram } from '../telegram';
 import { homeScene, icons, stateImage } from '../data/assets';
-import { Card, ProgressBar, StatChip, PrimaryButton } from '../components/ui';
-import { messageForDay } from '../data/messages';
+import { Card, ProgressBar, StatChip } from '../components/ui';
+
+const REASONS = [
+  { key: 'forget', title: 'Забываю', advice: 'Можно изменить время напоминания или привязать действие к событию: после завтрака, после работы, перед сном.' },
+  { key: 'time', title: 'Не хватает времени', advice: 'Попробуй уменьшить минимальную планку. Главное — сохранить действие в расписании.' },
+  { key: 'hard', title: 'Слишком сложно', advice: 'Сделай действие проще: меньше объём, проще место, меньше подготовки.' },
+  { key: 'schedule', title: 'Неудобное расписание', advice: 'Выбери другие дни или время. Прошлые результаты сохранятся.' },
+  { key: 'want', title: 'Не хочется', advice: 'Проверь, зачем тебе эта привычка. Если ответ не находится, привычку можно заменить.' },
+  { key: 'other', title: 'Другое', advice: 'Запиши коротко, что мешает. Часто уже это помогает выбрать следующий шаг.' },
+];
 
 export default function Home() {
-  const { state, todayEntry, stage, dayNumber, isPaused, habitActiveToday, dispatch, today } = useStore();
+  const { state, todayEntry, stage, dayNumber, isPaused, habitActiveToday, dispatch, today, weekStats, misses } = useStore();
   const { haptic } = useTelegram();
+  const [reason, setReason] = useState<string | null>(null);
   const ob = state.onboarding!;
   const habit = ob.habit;
   const kind = ob.character;
-  const entry = todayEntry;
-  const done = entry?.done ?? false;
-  const msg = messageForDay(dayNumber);
-  const hour = new Date().getHours();
+  const done = todayEntry?.done ?? false;
+  const full = todayEntry?.full ?? false;
+  const status = isPaused ? 'Пауза. Прогресс сохранён.' : done ? 'Сегодня получилось.' : habitActiveToday ? 'Можно начать с минимума.' : 'Сегодня день отдыха по расписанию.';
+  const progressText = `День ${dayNumber}/90 · выполнено ${weekStats.done} из ${weekStats.elapsedPlanned || 0} наступивших дней недели`;
+  const selectedReason = REASONS.find(r => r.key === reason);
 
-  const logToday = (value: number) => {
+  const logToday = (value: number, note?: string) => {
     haptic('medium');
-    dispatch({ type: 'LOG_ENTRY', date: today, value });
-    dispatch({ type: 'SET_STATE', state: 'celebrate' });
-    setTimeout(() => dispatch({ type: 'SET_STATE', state: value >= habit.targetMin ? 'wait' : 'wait' }), 2500);
+    dispatch({ type: 'LOG_ENTRY', date: today, value, note });
+    setTimeout(() => dispatch({ type: 'SET_STATE', state: 'wait' }), 2200);
   };
 
-  const evening = hour >= 18;
+  const askCustomResult = () => {
+    if (habit.noQuantity) return logToday(1);
+    const v = prompt(`Сколько получилось? Укажи число в ${habit.unit}.`, String(todayEntry?.value ?? habit.targetMin));
+    if (v == null) return;
+    logToday(Math.max(0, parseInt(v) || 0));
+  };
 
   return (
-    <div className="relative">
-      {/* Шапка-сцена */}
-      <div className="relative h-64 overflow-hidden">
+    <div className="relative pb-6">
+      <div className="relative h-44 overflow-hidden">
         <img src={homeScene(kind)} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-cream/0 via-transparent to-cream" />
-        <div className="absolute top-4 left-4 right-4 flex gap-2 flex-wrap">
-          <StatChip icon={icons.crystal} value={state.xp} label="XP" />
-          <StatChip icon={icons.chip} value={state.coins} label="монет" />
-          <StatChip value={`⚡${state.energy}`} label="энергия" />
-        </div>
-        <div className="absolute bottom-2 left-0 right-0 flex justify-center">
-          <img
-            src={stateImage(kind, isPaused ? 'sleep' : done ? 'celebrate' : evening ? 'sleep' : 'wait', stage)}
-            alt={kind === 'robot' ? 'МейВиГо' : 'Пушок'}
-            className={`h-44 object-contain drop-shadow-xl ${done ? 'animate-pop' : 'animate-floaty'}`}
-          />
+        <div className="absolute inset-0 bg-gradient-to-b from-cream/0 via-cream/20 to-cream" />
+        <div className="absolute left-4 top-4 right-4 flex items-center gap-3">
+          {ob.heroEnabled && <img src={stateImage(kind, state.characterState, stage)} alt={ob.heroName} className={`w-24 h-24 object-contain drop-shadow-xl ${done ? 'animate-pop' : 'animate-floaty'}`} />}
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold text-teal-800 uppercase tracking-wide">{ob.heroEnabled ? ob.heroName : 'Сегодня'}</div>
+            <div className="font-black text-lg leading-tight">{status}</div>
+            <div className="text-xs text-ink/60 mt-1">{progressText}</div>
+          </div>
         </div>
       </div>
 
-      <div className="px-5 -mt-6 relative space-y-4 pb-6">
-        {/* Приветствие дня */}
-        <Card className="p-4 animate-fade-up">
-          <div className="text-xs font-bold text-teal-700 uppercase tracking-wide">День {dayNumber} · серия {state.streak}🔥</div>
-          <p className="mt-1 text-sm text-ink/80">{evening ? msg.evening : msg.morning}</p>
-        </Card>
-
-        {/* Карточка привычки */}
+      <div className="px-5 -mt-3 relative space-y-4">
         <Card className="p-5 animate-fade-up">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-xs text-ink/50 font-semibold">{ob.trackName}</div>
-              <div className="text-xl font-black">{habit.name}</div>
-            </div>
-            {state.streak > 0 && (
-              <div className="rounded-full bg-orange-100 text-orange-600 font-bold px-3 py-1 text-sm">
-                {state.streak} дн.
-              </div>
-            )}
-          </div>
+          <div className="text-xs font-bold text-ink/45 uppercase tracking-wide">{habit.sphere} · 90-дневный маршрут</div>
+          <h1 className="text-2xl font-black leading-tight mt-1">Сегодня: {habit.name}</h1>
+          {habit.anchorEvent && <div className="mt-2 text-sm text-ink/60">Удобный момент: {habit.anchorEvent}</div>}
 
           {isPaused ? (
-            <div className="mt-4 text-center text-ink/60 py-6">
-              Привычка на паузе{state.pausedUntil ? ` до ${state.pausedUntil}` : ''}
+            <div className="mt-5 rounded-2xl bg-white/70 border border-ink/10 p-4 text-sm text-ink/70">
+              Привычка на паузе{state.pausedUntil ? ` до ${state.pausedUntil}` : ''}. Календарный маршрут продолжается, но дни паузы не считаются выполнением.
             </div>
           ) : !habitActiveToday ? (
-            <div className="mt-4 text-center text-ink/60 py-6">
-              Сегодня выходной по расписанию 🎉
+            <div className="mt-5 rounded-2xl bg-white/70 border border-ink/10 p-4 text-sm text-ink/70">
+              По твоему расписанию сегодня отдых. Он не считается пропуском.
             </div>
           ) : (
             <>
-              {/* Две планки */}
-              <div className="mt-4 space-y-2">
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1">
-                    <span className="text-teal-700">Минимум · {habit.targetMin} {habit.unit}</span>
-                    <span className="text-ink/50">{entry?.value ?? 0}</span>
-                  </div>
-                  <ProgressBar
-                    value={Math.min(entry?.value ?? 0, habit.targetMin)}
-                    max={habit.targetMin}
-                    barClass={done ? 'bg-teal-600' : 'bg-teal-400'}
-                  />
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-teal-50 border border-teal-100 p-3">
+                  <div className="text-xs font-bold text-teal-700">Минимум</div>
+                  <div className="text-lg font-black">{habit.noQuantity ? 'Сделано' : formatUnit(habit.targetMin, habit)}</div>
                 </div>
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1">
-                    <span className="text-orange-600">Цель · {habit.targetGoal} {habit.unit}</span>
-                    <span className="text-ink/50">{entry?.value ?? 0}</span>
-                  </div>
-                  <ProgressBar
-                    value={Math.min(entry?.value ?? 0, habit.targetGoal)}
-                    max={habit.targetGoal}
-                    barClass={entry?.full ? 'bg-orange-500' : 'bg-orange-300'}
-                  />
-                </div>
+                {!habit.noQuantity && <div className="rounded-2xl bg-orange-50 border border-orange-100 p-3">
+                  <div className="text-xs font-bold text-orange-600">Полная цель</div>
+                  <div className="text-lg font-black">{formatUnit(habit.targetGoal, habit)}</div>
+                </div>}
               </div>
 
-              {/* Отметка в одно касание */}
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => logToday(habit.targetMin)}
-                  className="rounded-2xl bg-teal-600 text-white font-bold py-4 active:scale-95 transition shadow-lg shadow-teal-900/20"
-                >
-                  ✓ Сделал
+              {todayEntry && (
+                <div className="mt-4 rounded-2xl bg-white/75 border border-ink/10 p-3 text-sm">
+                  <b>Сегодня сохранено:</b> {habit.noQuantity ? 'сделано' : formatUnit(todayEntry.value, habit)}
+                  {todayEntry.status === 'attempt' && <div className="text-ink/60 mt-1">Это попытка. Минимум пока не засчитан.</div>}
+                </div>
+              )}
+
+              <div className={`mt-5 grid gap-2 ${habit.noQuantity ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                <button onClick={() => logToday(habit.targetMin)} className="rounded-2xl bg-teal-700 text-white font-bold py-4 active:scale-95 transition shadow-lg shadow-teal-900/20">
+                  {habit.noQuantity ? 'Сделано' : 'Сделал минимум'}
                 </button>
-                <button
-                  onClick={() => logToday(Math.round((habit.targetMin + habit.targetGoal) / 2))}
-                  className="rounded-2xl bg-orange-500 text-white font-bold py-4 active:scale-95 transition shadow-lg shadow-orange-900/20"
-                >
-                  ★ Больше
-                </button>
-                <button
-                  onClick={() => {
-                    const v = prompt(`Сколько ${habit.unit}? (0–${habit.targetGoal})`, String(entry?.value ?? habit.targetMin));
-                    if (v != null) logToday(Math.max(0, Math.min(habit.targetGoal, parseInt(v) || 0)));
-                  }}
-                  className="rounded-2xl border border-ink/15 bg-white/80 font-bold py-4 active:scale-95 transition"
-                >
-                  ✎ Свой
-                </button>
+                {!habit.noQuantity && <button onClick={() => logToday(habit.targetGoal)} className="rounded-2xl bg-orange-500 text-white font-bold py-4 active:scale-95 transition shadow-lg shadow-orange-900/20">Сделал полностью</button>}
               </div>
+              {!habit.noQuantity && <button onClick={askCustomResult} className="mt-3 text-sm font-semibold text-teal-800 underline underline-offset-4">Указать свой результат</button>}
+              {todayEntry && <button onClick={() => dispatch({ type: 'CLEAR_ENTRY', date: today })} className="ml-4 mt-3 text-sm font-semibold text-ink/50 underline underline-offset-4">Исправить отметку</button>}
             </>
           )}
         </Card>
 
-        {/* Вечерняя вылазка */}
-        <Card className="p-4 flex items-center gap-4 animate-fade-up">
-          <img src={icons.battery} alt="" className="w-14 h-14 object-contain" />
-          <div className="flex-1">
-            <div className="font-bold">Вечерняя вылазка</div>
-            <div className="text-sm text-ink/60">
-              {done ? 'Выполнено — +энергия и монеты' : 'Сделай привычку и получи бонус'}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="font-black text-teal-700">+15⚡</div>
-            <div className="text-xs text-ink/50">+5 монет</div>
-          </div>
-        </Card>
+        {state.lastResultMessage && (
+          <Card className="p-4 border-teal-100 bg-teal-50/80 animate-pop">
+            <div className="font-bold text-teal-800">{state.lastResultMessage}</div>
+          </Card>
+        )}
 
-        {/* Энергия дня */}
+        {misses >= 2 && state.dismissedHelpAt !== today && (
+          <Card className="p-4 animate-fade-up">
+            <div className="font-black">Что сейчас мешает?</div>
+            <div className="text-sm text-ink/60 mt-1">Ответ необязательный. Поможем подстроить план, если он неудобен.</div>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {REASONS.map(r => <button key={r.key} onClick={() => setReason(r.key)} className={`rounded-full px-3 py-2 text-sm font-semibold border ${reason === r.key ? 'bg-teal-700 text-white border-teal-700' : 'bg-white/80 border-ink/10'}`}>{r.title}</button>)}
+            </div>
+            {selectedReason && <div className="mt-3 rounded-2xl bg-white/75 border border-ink/10 p-3 text-sm text-ink/75">{selectedReason.advice}</div>}
+            <div className="mt-3 flex gap-2">
+              <button onClick={() => dispatch({ type: 'DISMISS_HELP' })} className="rounded-xl bg-white/80 border border-ink/10 px-3 py-2 text-sm font-semibold">Не сейчас</button>
+              <button onClick={() => alert('Изменение плана будет доступно в настройках привычки на следующем шаге.')} className="rounded-xl bg-teal-700 text-white px-3 py-2 text-sm font-semibold">Изменить план</button>
+            </div>
+          </Card>
+        )}
+
         <Card className="p-4 animate-fade-up">
           <div className="flex justify-between text-sm font-semibold mb-2">
-            <span>Энергия дня</span>
-            <span className="text-ink/50">{state.energy}/100</span>
+            <span>Эта неделя</span>
+            <span className="text-ink/50">{weekStats.done}/{weekStats.elapsedPlanned || weekStats.planned}</span>
           </div>
-          <ProgressBar value={state.energy} max={100} barClass="bg-gradient-to-r from-amber-400 to-orange-500" />
+          <ProgressBar value={weekStats.done} max={Math.max(1, weekStats.elapsedPlanned || weekStats.planned)} barClass="bg-teal-600" />
+          <div className="text-xs text-ink/50 mt-2">Запланировано до конца недели: {weekStats.planned}. Будущие дни не считаются пропусками.</div>
+        </Card>
+
+        <Card className="p-4 animate-fade-up">
+          <div className="flex items-center justify-between gap-2">
+            <StatChip icon={icons.crystal} value={state.xp} label="XP" />
+            <StatChip icon={icons.chip} value={state.coins} label="монет" />
+            <StatChip icon={icons.battery} value={`${state.energy}/100`} label="энергия" />
+          </div>
+          <div className="mt-3 text-xs text-ink/55">Игровые награды — дополнение. Основной результат считается по твоему расписанию.</div>
         </Card>
       </div>
     </div>
