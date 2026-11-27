@@ -1,23 +1,22 @@
-import { useStore, planStats } from '../store';
+import { activeDays, useStore } from '../store';
 import { stageImage, scenes } from '../data/assets';
 import { Card, ProgressBar } from '../components/ui';
 
 const STAGES = [
-  { stage: 1, name: 'Старт', day: 1, text: 'Герой появляется рядом с первой привычкой.' },
-  { stage: 2, name: 'Первый ритм', day: 7, text: 'Открывается после первой контрольной недели при выполнении хотя бы 60% плана.' },
-  { stage: 3, name: 'Закрепление', day: 21, text: 'Проверяем, что расписание реально подходит.' },
-  { stage: 4, name: 'Устойчивость', day: 45, text: 'Герой меняется вместе с твоей регулярностью.' },
-  { stage: 5, name: 'Маршрут', day: 75, text: 'Финальная стадия 90-дневного цикла.' },
+  { stage: 1, name: 'Старт', active: 0, text: 'Герой появляется рядом с первой привычкой.' },
+  { stage: 2, name: 'Первый ритм', active: 15, text: 'Открывается после 15 уникальных дней с F или M.' },
+  { stage: 3, name: 'Закрепление', active: 30, text: 'Считаются дни, а не количество привычек за один день.' },
+  { stage: 4, name: 'Устойчивость', active: 60, text: 'Герой меняется вместе с регулярностью.' },
+  { stage: 5, name: 'Маршрут', active: 90, text: 'Финальная стадия по активным дням.' },
 ];
 
 export default function Path() {
   const { state, stage, dayNumber } = useStore();
   const habit = state.onboarding!.habit;
   const kind = state.onboarding!.character;
-  const stats = planStats(habit, state.entries, habit.startDate, new Date().toISOString().slice(0, 10), state.pausedUntil);
-  const compliance = stats.elapsedPlanned ? Math.round((stats.done / stats.elapsedPlanned) * 100) : 0;
+  const days = activeDays(state.entries, habit.id);
   const nextStage = STAGES.find(s => s.stage > stage);
-  const nextProgress = nextStage ? Math.min(100, Math.round((dayNumber / nextStage.day) * 100)) : 100;
+  const nextProgress = nextStage ? Math.min(100, Math.round((days / nextStage.active) * 100)) : 100;
 
   return (
     <div className="px-5 pt-8 pb-2 space-y-4">
@@ -33,17 +32,17 @@ export default function Path() {
 
       <Card className="p-4">
         <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-sm font-semibold mb-2">
-          <span>Соблюдение личного плана</span>
-          <span className="text-ink/50">{stats.done}/{stats.elapsedPlanned || 0}</span>
+          <span>Активные дни с F или M</span>
+          <span className="text-ink/50">{days}/90</span>
         </div>
-        <ProgressBar value={stats.done} max={Math.max(1, stats.elapsedPlanned)} barClass="bg-teal-600" />
-        <div className="text-xs text-ink/50 mt-2">Текущий результат — {compliance}%. Для новых стадий ориентир — 60% запланированных действий.</div>
+        <ProgressBar value={days} max={90} barClass="bg-teal-600" />
+        <div className="text-xs text-ink/50 mt-2">Один день засчитывается один раз, независимо от количества действий. P и S сохраняются как факты без XP.</div>
       </Card>
 
       {nextStage && (
         <Card className="p-4">
-          <div className="font-bold">Следующая контрольная точка: день {nextStage.day}</div>
-          <div className="text-sm text-ink/60 mt-1">Если к этому моменту выполнено не меньше 60% плана, откроется стадия «{nextStage.name}».</div>
+          <div className="font-bold">Следующая стадия: {nextStage.active} активных дней</div>
+          <div className="text-sm text-ink/60 mt-1">До стадии «{nextStage.name}» осталось {Math.max(0, nextStage.active - days)}.</div>
           <ProgressBar value={nextProgress} max={100} barClass="bg-orange-500" className="mt-3" />
         </Card>
       )}
@@ -54,11 +53,11 @@ export default function Path() {
           const current = stage === s.stage;
           return (
             <Card key={s.stage} className={`p-3 min-[390px]:p-4 flex items-center gap-3 min-[390px]:gap-4 ${current ? 'ring-2 ring-teal-600' : ''} ${!reached ? 'opacity-70' : ''}`}>
-              <img src={stageImage(kind, reached ? s.stage : Math.max(1, stage))} alt="" className={`w-16 h-16 min-[390px]:w-20 min-[390px]:h-20 object-contain shrink-0 ${current ? 'animate-floaty' : ''}`} />
+              <img src={stageImage(kind, reached ? s.stage : Math.max(1, stage))} alt="" className={`w-16 h-16 min-[390px]:w-20 min-[390px]:h-20 object-contain shrink-0 ${current && state.settings.animations ? 'animate-floaty' : ''}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap justify-between items-baseline gap-x-2 gap-y-1">
                   <span className="font-black">Стадия {s.stage} · {s.name}</span>
-                  <span className="text-xs text-ink/50">день {s.day}</span>
+                  <span className="text-xs text-ink/50">{s.active} дней</span>
                 </div>
                 <div className="text-xs text-ink/60 mt-1">{s.text}</div>
                 {reached && <div className="text-xs text-teal-700 font-semibold mt-1">Открыта</div>}

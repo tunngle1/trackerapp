@@ -39,20 +39,24 @@ export default function CalendarScreen() {
   const monthName = view.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   const monthFrom = `${y}-${String(m + 1).padStart(2, '0')}-01`;
   const monthTo = `${y}-${String(m + 1).padStart(2, '0')}-${String(daysInMonth(y, m)).padStart(2, '0')}`;
-  const monthStats = planStats(habit, state.entries, monthFrom, monthTo, state.pausedUntil);
+  const monthStats = planStats(habit, state.entries, monthFrom, monthTo, state.pausedUntil, state.transfers);
   const week = currentWeekBounds();
-  const weekStats = planStats(habit, state.entries, week.from, week.to, state.pausedUntil);
+  const weekStats = planStats(habit, state.entries, week.from, week.to, state.pausedUntil, state.transfers);
   const last = prevWeek(week.from);
-  const lastStats = planStats(habit, state.entries, last.from, last.to, state.pausedUntil);
+  const lastStats = planStats(habit, state.entries, last.from, last.to, state.pausedUntil, state.transfers);
 
   const dayClass = (date: string) => {
     const e = state.entries[date];
-    const scheduled = isScheduled(habit, date, state.pausedUntil);
+    const scheduled = isScheduled(habit, date, state.pausedUntil, state.transfers);
     const future = date > today;
-    const paused = state.pausedUntil && date <= state.pausedUntil && date >= today;
-    if (e?.full) return 'bg-orange-500 text-white';
-    if (e?.done) return 'bg-teal-600 text-white';
-    if (e?.status === 'attempt') return 'bg-amber-100 text-amber-700';
+    const paused = state.pausedUntil && date <= state.pausedUntil && date >= habit.startDate;
+    const transferred = Boolean(state.transfers[date]);
+    const transferredTo = Object.values(state.transfers).includes(date);
+    if (e?.check === 'F') return 'bg-orange-500 text-white';
+    if (e?.check === 'M') return 'bg-teal-600 text-white';
+    if (e?.check === 'P') return 'bg-amber-100 text-amber-700';
+    if (e?.check === 'S') return 'bg-stone-200 text-stone-700';
+    if (transferred || transferredTo) return 'bg-violet-100 text-violet-700';
     if (paused) return 'bg-sky-100 text-sky-700';
     if (!scheduled) return 'bg-ink/5 text-ink/30';
     if (future) return 'bg-white/80 text-ink/60 border border-ink/10';
@@ -82,11 +86,13 @@ export default function CalendarScreen() {
           })}
         </div>
         <div className="grid grid-cols-2 gap-2 mt-4 text-[11px] text-ink/60">
-          <Legend color="bg-teal-600" text="минимум" />
-          <Legend color="bg-orange-500" text="полная цель" />
-          <Legend color="bg-red-50 border border-red-100" text="пропуск" />
+          <Legend color="bg-teal-600" text="M минимум" />
+          <Legend color="bg-orange-500" text="F полная" />
+          <Legend color="bg-amber-100" text="P факт ниже" />
+          <Legend color="bg-stone-200" text="S не было" />
+          <Legend color="bg-violet-100" text="перенос" />
           <Legend color="bg-ink/5" text="отдых" />
-          <Legend color="bg-white border border-ink/10" text="ещё не наступило" />
+          <Legend color="bg-red-50 border border-red-100" text="U нет отметки" />
           <Legend color="bg-sky-100" text="пауза" />
         </div>
       </Card>
@@ -97,8 +103,8 @@ export default function CalendarScreen() {
           Запланировано до конца недели — {weekStats.planned}. Уже наступило — {weekStats.elapsedPlanned}. Выполнено — {weekStats.done}.
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-          <Metric value={weekStats.min} label="минимум" />
-          <Metric value={weekStats.full} label="полная цель" />
+          <Metric value={weekStats.min} label="M/F зачёт" />
+          <Metric value={weekStats.attempts + weekStats.skipped + weekStats.unknown} label="P/S/U" />
           <Metric value={weekStats.elapsedPlanned ? `${Math.round((weekStats.done / weekStats.elapsedPlanned) * 100)}%` : '—'} label="ритм" />
         </div>
       </Card>

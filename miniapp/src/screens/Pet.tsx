@@ -27,7 +27,7 @@ export default function Pet() {
           <img
             src={stateImage(kind, asleep ? 'sleep' : 'wait', stage)}
             alt=""
-            className={`h-52 object-contain drop-shadow-2xl ${asleep ? '' : 'animate-floaty'}`}
+            className={`h-52 object-contain drop-shadow-2xl ${asleep || !state.settings.animations ? '' : 'animate-floaty'}`}
           />
         </div>
         <div className="absolute top-3 left-3 rounded-full bg-ink/50 text-white text-xs font-bold px-3 py-1.5 backdrop-blur">

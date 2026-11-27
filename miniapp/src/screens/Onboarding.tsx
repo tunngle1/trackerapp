@@ -78,6 +78,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
       startDate,
       anchorEvent: anchorEvent.trim(),
       cycleDays: 90,
+      version: 1,
     };
     dispatch({
       type: 'COMPLETE_ONBOARDING',

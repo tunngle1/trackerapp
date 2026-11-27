@@ -1,4 +1,5 @@
 import { useStore, currentWeekBounds, planStats } from '../store';
+import { localInsights } from '../analytics';
 import { Card, ProgressBar } from '../components/ui';
 import { icons, scenes, stageImage } from '../data/assets';
 
@@ -16,11 +17,13 @@ export default function Progress() {
   const habit = state.onboarding!.habit;
   const kind = state.onboarding!.character;
   const week = currentWeekBounds();
-  const weekData = planStats(habit, state.entries, week.from, week.to, state.pausedUntil);
+  const weekData = planStats(habit, state.entries, week.from, week.to, state.pausedUntil, state.transfers);
   const prev = previousPeriod(week.from, 7);
-  const prevWeek = planStats(habit, state.entries, prev.from, prev.to, state.pausedUntil);
+  const prevWeek = planStats(habit, state.entries, prev.from, prev.to, state.pausedUntil, state.transfers);
   const totalDone = Object.values(state.entries).filter(e => e.habitId === habit.id && e.done).length;
   const totalFull = Object.values(state.entries).filter(e => e.habitId === habit.id && e.full).length;
+  const insights = localInsights(habit, state);
+  const reflections = Object.values(state.reflections).filter(r => r.gratitude || r.contribution).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
 
   const createStoryCard = async () => {
     const canvas = document.createElement('canvas');
@@ -123,9 +126,36 @@ export default function Progress() {
         <ul className="text-sm text-ink/70 space-y-2">
           <li>• Всего выполнено: {totalDone}. Полная цель — {totalFull}.</li>
           {weekData.elapsedPlanned > 0 && <li>• На этой неделе выполнено {weekData.done} из {weekData.elapsedPlanned} наступивших запланированных дней.</li>}
+          <li>• Фактические отметки: F={weekData.full}, M={Math.max(0, weekData.min - weekData.full)}, P={weekData.attempts}, S={weekData.skipped}, U={weekData.unknown}.</li>
           {weekData.done === 0 && <li>• Сегодня можно начать с минимума. Этого достаточно, чтобы маршрут продолжился.</li>}
-          {weekData.done > 0 && <li>• План можно оставить как есть, если такой ритм тебе подходит.</li>}
         </ul>
+      </Card>
+
+      <Card className="p-4">
+        <div className="font-bold mb-2">Наблюдения по правилам 2.0</div>
+        <div className="space-y-2">
+          {insights.map(i => (
+            <div key={i.ruleId} className="rounded-2xl bg-white/70 border border-ink/10 p-3">
+              <div className="text-xs font-bold text-ink/45 uppercase">{i.ruleId} · {i.kind}</div>
+              <div className="text-sm font-semibold mt-1">{i.text}</div>
+              <div className="text-xs text-teal-700 font-semibold mt-1">{i.action}</div>
+            </div>
+          ))}
+          {insights.length === 0 && <div className="text-sm text-ink/60">Пока недостаточно данных. Нейтральный факт важнее выдуманной рекомендации.</div>}
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="font-bold mb-2">Записи благодарности и вклада</div>
+        {reflections.length ? <div className="space-y-2">
+          {reflections.map(r => (
+            <div key={r.date} className="rounded-2xl bg-white/70 border border-ink/10 p-3 text-sm">
+              <div className="text-xs font-bold text-ink/45">{r.date}</div>
+              {r.gratitude && <div className="mt-1"><b>Себе:</b> {r.gratitude}</div>}
+              {r.contribution && <div className="mt-1"><b>Другим:</b> {r.contribution}</div>}
+            </div>
+          ))}
+        </div> : <div className="text-sm text-ink/60">Здесь появятся добровольные записи из экрана «Сегодня».</div>}
       </Card>
     </div>
   );

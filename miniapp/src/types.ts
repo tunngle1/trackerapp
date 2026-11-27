@@ -3,14 +3,16 @@ export type CharacterState = 'wait' | 'sleep' | 'celebrate' | 'return';
 export type Sphere = 'Дело' | 'Тело' | 'Жизнь';
 export type UnitKind = 'minutes' | 'hours' | 'pages' | 'km' | 'reps' | 'times' | 'custom' | 'none';
 export type EntryStatus = 'attempt' | 'minimum' | 'full';
+export type CheckStatus = 'F' | 'M' | 'P' | 'S';
+export type BarrierKind = 'time' | 'forget' | 'start' | 'conflict' | 'energy' | 'other';
 
 export interface Habit {
   id: string;
   name: string;
   sphere: Sphere;
-  /** Цель — полный объём. Для привычки без числа равно 1. */
+  /** Обычная планка. Для качественной привычки без числа равна 1. */
   targetGoal: number;
-  /** Минимум — зачитываемый объём. Для привычки без числа равно 1. */
+  /** Минимальная зачитываемая планка. Для качественной привычки равна 1. */
   targetMin: number;
   unit: string;
   unitKind: UnitKind;
@@ -22,6 +24,7 @@ export interface Habit {
   startDate: string; // YYYY-MM-DD
   anchorEvent: string;
   cycleDays: number;
+  version: number;
 }
 
 export interface OnboardingData {
@@ -36,16 +39,40 @@ export interface OnboardingData {
 }
 
 export interface DayEntry {
-  date: string; // YYYY-MM-DD
+  date: string; // YYYY-MM-DD — локальная дата обязательства
   habitId: string;
-  value: number; // выполненный объём, для noQuantity = 1
+  obligationId: string;
+  planVersion: number;
+  value: number;
   status: EntryStatus;
-  done: boolean; // достигнут минимум
-  full: boolean; // достигнута цель
+  check: CheckStatus;
+  done: boolean; // F или M
+  full: boolean; // F
   xpAwarded: number;
   coinsAwarded: number;
+  occurredAt?: string;
+  recordedAt: string;
+  note?: string;
+  transferredTo?: string;
+  linkedFrom?: string;
+  updatedAt: string;
+}
+
+export interface ReflectionEntry {
+  date: string;
+  gratitude?: string;
+  contribution?: string;
+  barrier?: BarrierKind;
   note?: string;
   updatedAt: string;
+}
+
+export interface UserSettings {
+  characterReplies: boolean;
+  animations: boolean;
+  telegramMessages: boolean;
+  reflections: boolean;
+  analytics: boolean;
 }
 
 export interface AppState {
@@ -57,9 +84,12 @@ export interface AppState {
   streak: number;
   energy: number; // 0..100 энергия дня
   entries: Record<string, DayEntry>;
+  reflections: Record<string, ReflectionEntry>;
+  transfers: Record<string, string>;
   pausedUntil: string | null;
   pro: boolean;
   founderLetterRead: boolean;
   lastResultMessage: string | null;
   dismissedHelpAt: string | null;
+  settings: UserSettings;
 }
