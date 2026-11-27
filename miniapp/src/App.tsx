@@ -9,6 +9,7 @@ import Pet from './screens/Pet';
 import Progress from './screens/Progress';
 import Profile from './screens/Profile';
 import { icons } from './data/assets';
+import ErrorBoundary from './components/ErrorBoundary';
 
 type Tab = 'home' | 'path' | 'hero' | 'profile';
 
@@ -83,8 +84,10 @@ function Hero() {
 
 export default function App() {
   return (
-    <StoreProvider>
-      <Shell />
-    </StoreProvider>
+    <ErrorBoundary>
+      <StoreProvider>
+        <Shell />
+      </StoreProvider>
+    </ErrorBoundary>
   );
 }

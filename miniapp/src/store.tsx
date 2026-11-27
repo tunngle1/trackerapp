@@ -87,9 +87,14 @@ function defaultOnboarding(): OnboardingData {
   };
 }
 
-function migrateEntry(date: string, raw: Partial<DayEntry>, habitId: string, planVersion: number): DayEntry {
-  const status = raw.status ?? (raw.full ? 'full' : raw.done ? 'minimum' : 'attempt');
-  const check = raw.check ?? checkForStatus(status);
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function migrateEntry(date: string, input: unknown, habitId: string, planVersion: number): DayEntry {
+  const raw = asRecord(input) as Partial<DayEntry>;
+  const status = raw.status === 'full' || raw.status === 'minimum' || raw.status === 'attempt' ? raw.status : (raw.full ? 'full' : raw.done ? 'minimum' : 'attempt');
+  const check = raw.check === 'F' || raw.check === 'M' || raw.check === 'P' || raw.check === 'S' ? raw.check : checkForStatus(status);
   const reward = entryReward(check);
   return {
     date,
@@ -114,42 +119,66 @@ function migrateEntry(date: string, raw: Partial<DayEntry>, habitId: string, pla
 
 function migrateState(input: Partial<AppState>): AppState {
   const base = defaultState();
-  const onboarding = input.onboarding ? {
+  const rawInput = asRecord(input) as Partial<AppState>;
+  const rawOnboarding = asRecord(rawInput.onboarding) as Partial<OnboardingData>;
+  const rawHabit = asRecord(rawOnboarding.habit) as Partial<Habit>;
+  const hasOnboarding = Boolean(rawInput.onboarding);
+  const rawDays = Array.isArray(rawHabit.days) ? rawHabit.days : null;
+  const days = rawDays?.map(Number).filter(d => d >= 0 && d <= 6) ?? defaultHabit().days;
+  const startDate = typeof rawHabit.startDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawHabit.startDate) ? rawHabit.startDate : todayStr();
+  const character = rawOnboarding.character === 'cat' ? 'cat' : 'robot';
+  const habit: Habit = {
+    ...defaultHabit(),
+    ...rawHabit,
+    id: typeof rawHabit.id === 'string' && rawHabit.id ? rawHabit.id : 'main-habit',
+    name: typeof rawHabit.name === 'string' && rawHabit.name.trim() ? rawHabit.name : 'Моя привычка',
+    sphere: rawHabit.sphere === 'Тело' || rawHabit.sphere === 'Жизнь' ? rawHabit.sphere : 'Дело',
+    targetMin: Math.max(1, Number(rawHabit.targetMin) || 1),
+    targetGoal: Math.max(1, Number(rawHabit.targetGoal) || Number(rawHabit.targetMin) || 1),
+    unit: typeof rawHabit.unit === 'string' && rawHabit.unit ? rawHabit.unit : 'раз',
+    unitKind: rawHabit.unitKind ?? 'none',
+    noQuantity: Boolean(rawHabit.noQuantity),
+    days: days.length ? days : defaultHabit().days,
+    reminderOn: rawHabit.reminderOn !== false,
+    reminderTime: typeof rawHabit.reminderTime === 'string' ? rawHabit.reminderTime : null,
+    startDate,
+    anchorEvent: typeof rawHabit.anchorEvent === 'string' ? rawHabit.anchorEvent : '',
+    cycleDays: Number(rawHabit.cycleDays) || 90,
+    version: Math.max(1, Number(rawHabit.version) || 1),
+  };
+  habit.targetMin = Math.min(habit.targetMin, habit.targetGoal);
+  const onboarding = hasOnboarding ? {
     ...defaultOnboarding(),
-    ...input.onboarding,
-    heroName: input.onboarding.heroName ?? (input.onboarding.character === 'cat' ? 'Пушок' : 'МиВиГо'),
-    heroEnabled: input.onboarding.heroEnabled ?? true,
-    habit: {
-      ...defaultHabit(),
-      ...input.onboarding.habit,
-      id: input.onboarding.habit?.id ?? 'main-habit',
-      sphere: input.onboarding.habit?.sphere ?? 'Дело',
-      unitKind: input.onboarding.habit?.unitKind ?? (input.onboarding.habit?.unit === 'мин' ? 'minutes' : 'custom'),
-      noQuantity: input.onboarding.habit?.noQuantity ?? false,
-      startDate: input.onboarding.habit?.startDate ?? todayStr(),
-      anchorEvent: input.onboarding.habit?.anchorEvent ?? '',
-      cycleDays: input.onboarding.habit?.cycleDays ?? 90,
-      version: input.onboarding.habit?.version ?? 1,
-    },
+    ...rawOnboarding,
+    character,
+    heroName: typeof rawOnboarding.heroName === 'string' && rawOnboarding.heroName ? rawOnboarding.heroName : (character === 'cat' ? 'Пушок' : 'МиВиГо'),
+    heroEnabled: rawOnboarding.heroEnabled !== false,
+    trackName: typeof rawOnboarding.trackName === 'string' && rawOnboarding.trackName ? rawOnboarding.trackName : 'Мой путь',
+    habit,
   } satisfies OnboardingData : null;
 
   const habitId = onboarding?.habit.id ?? 'main-habit';
   const planVersion = onboarding?.habit.version ?? 1;
-  const entries = Object.fromEntries(Object.entries(input.entries ?? {}).map(([date, raw]) => [date, migrateEntry(date, raw as Partial<DayEntry>, habitId, planVersion)]));
-  const reflections = Object.fromEntries(Object.entries(input.reflections ?? {}).map(([date, raw]) => [date, { ...raw, date, updatedAt: raw.updatedAt ?? nowIso() } satisfies ReflectionEntry]));
+  const entries = Object.fromEntries(Object.entries(asRecord(rawInput.entries)).map(([date, raw]) => [date, migrateEntry(date, raw, habitId, planVersion)]));
+  const reflections = Object.fromEntries(Object.entries(asRecord(rawInput.reflections)).map(([date, value]) => {
+    const raw = asRecord(value) as Partial<ReflectionEntry>;
+    return [date, { ...raw, date, updatedAt: raw.updatedAt ?? nowIso() } satisfies ReflectionEntry];
+  }));
+  const transfers = Object.fromEntries(Object.entries(asRecord(rawInput.transfers)).filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
 
   return {
     ...base,
-    ...input,
+    ...rawInput,
+    onboarded: Boolean(rawInput.onboarded),
     onboarding,
     entries,
     reflections,
-    transfers: input.transfers ?? {},
+    transfers,
     pro: true,
-    energy: Math.min(3, Math.max(0, input.energy ?? base.energy)),
-    settings: { ...defaultSettings(), ...(input.settings ?? {}) },
-    lastResultMessage: input.lastResultMessage ?? null,
-    dismissedHelpAt: input.dismissedHelpAt ?? null,
+    energy: Math.min(3, Math.max(0, Number(rawInput.energy) || base.energy)),
+    settings: { ...defaultSettings(), ...asRecord(rawInput.settings) },
+    lastResultMessage: typeof rawInput.lastResultMessage === 'string' ? rawInput.lastResultMessage : null,
+    dismissedHelpAt: typeof rawInput.dismissedHelpAt === 'string' ? rawInput.dismissedHelpAt : null,
   };
 }
 

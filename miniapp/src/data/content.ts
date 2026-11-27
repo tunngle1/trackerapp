@@ -93,7 +93,7 @@ function seed(input: string): number {
 export function pickContent(category: string, trigger: string, key: string, character?: CharacterKind): ContentRecord | undefined {
   const records = CONTENT_LIBRARY.filter(r =>
     r.category === category && r.triggerEvent === trigger && (!character || !r.character || r.character === character)
-  ).sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));
+  ).sort((a, b) => b.priority - a.priority || String(a.id ?? '').localeCompare(String(b.id ?? '')));
   if (!records.length) return undefined;
   return records[seed(`${category}:${trigger}:${key}:${character ?? ''}`) % records.length];
 }
